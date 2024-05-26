@@ -265,6 +265,10 @@ number_nodes * cpus_per_node = total_cpus
 
 ### Usage
 
+- You can list all nodes and its status with `sinfo -Nel`
+
+- Or inspect a single node with `scontrol show node <node_name>`
+
 On cluster.uy's official Telegram channel it shows this info:
 
 ```
