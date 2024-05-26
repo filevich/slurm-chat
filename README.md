@@ -1,4 +1,10 @@
-## How to run
+## How to run locally
+
+- start server `python3 ~/Workspace/py/chat/srv.py --port 8989`
+- start alice `python3 ~/Workspace/py/chat/cli.py --port 8989 alice`
+- start bob `python3 ~/Workspace/py/chat/cli.py --port 8989 bob`
+
+## How to run in SLURM cluster
 
 Reserve a node to host the srv
 
