@@ -219,3 +219,54 @@ Disconnected from the server
 --------------------------------------------------------------------------------
 done Sun May 26 02:04:06 -03 2024
 ```
+
+
+
+
+## About cluster.uy architecture
+
+On its website, cluster.uy shows this info:
+
+```
+node            CPU_type        cores ‡ mem_node gpu_node        disk
+node[01-14][17] Xeon Gold 6138  40      128 GB   NVIDIA P100     300 GB SSD
+node[15][16]    Xeon Gold 6138  40      128 GB   NVIDIA A100     300 GB SSD
+node[26-28]     Xeon Gold 6138  40      128 GB   -               300 GB SSD
+node[18-22]     Xeon Gold 6138  40      128 GB   NVIDIA P100 x 2 300 GB SSD
+node23          Xeon Gold 6138  40      128 GB   NVIDIA P100 x 3 300 GB SSD
+node[24-25]     Xeon Gold 6138  40      512 GB   -               300 GB SSD
+node31          AMD EPYC  7642  96      256 GB   -               150 GB SSD
+```
+
+‡ That information is kind of misleading. E.g., Xeon Gold 6138 has 20 physical
+cores, and 40 (physical) threads, but only if Hyper-Threading is enabled.
+To the date, cluster.uy DOES NOT has HT enabled, so the actual number of cores
+per cpu should be half for each of them. Same for AMD Epyc 7642 which in reality
+only has 48 physical cores.
+
+And thus,
+
+```
+number_nodes * cpus_per_node = total_cpus
+((14-1+1)+1) *      (20)     = 300
+(2)          *      (20)     = 40
+(28-26+1)    *      (20)     = 60
+(22-18+1)    *      (20)     = 100
+(1)          *      (20)     = 20
+(25-24+1)    *      (20)     = 40
+(1)          *      (96)     = 48
+                              -------
+                               608 = (1.216 / 2)
+```
+
+### Comparison
+
+- Noam Brown used 600 nodes, each equipped with 28 cores, over a period of 40 
+  days to train Libratus. That is, `600 nodes * 28 cores * 40 days * 24 hours = 16M core-hours`
+
+- The system where Pluribus was trained used `(n nodes * c cores) * d days * 24 hours = 12.4k core-hours` 
+  where `n*c = 64`, so we can derive that it was trained for about 8 days.
+
+- ReBeL used 7.5k core-hours, only one single machine for training and up to 
+  128 machines with 8 GPUs each for data generation (i.e., self-play).
+
