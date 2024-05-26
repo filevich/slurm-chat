@@ -1,20 +1,83 @@
-### running with
+## How to run
 
-`sbatch -J botbatch ~/Workspace/_tmp/chat/bots.sbatch 35`
+Reserve a node to host the srv
 
-array
+`srun --job-name=srvchat --time=05:00:00 --partition=besteffort --qos=besteffort --ntasks=1 --cpus-per-task=1 --mem=512M --pty bash -l`
+
+Then, once inside of it run
 
 ```bash
-#SBATCH --array=1-50
-#SBATCH --ntasks=1
+PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+echo "Starting srv on port $PORT"
+scontrol update JobId="$SLURM_JOB_ID" Comment="$PORT"
+$HOME/miniconda3/envs/testing/bin/python3 $HOME/Workspace/_tmp/slurm-chat/srv.py --port $PORT
 ```
 
-vs taks + srun
+Now, run the parallel bots with
+
+`sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/bots.sbatch 10`
+
+
+
+
+## Array vs ntasks
+
+- If you use array: the (sub)jobs may start at different times
+- If you use tasks: they're gonna start all at the same time
+
+At the end, it all comes down to this: if your job is embarrassingly parallel,
+you can use array (or even ntasks), else, you should use ntasks. 
+
+### array
+
+* You cannot set `--array` greater than 50
+* In `normal` QoS only 30 (sub)jobs will run in parallel. If you set `--array` 
+  to 50, then it will run 30 processes, and then 20.
+* If you run with `--array=1-50` and set sbatch bots to produce 10 msgs you will get:
+    - First 30 parallel processes, and then 20 parallel procesess
+    - 50 log files in total (one for each bot)
+    - 10 msgs * 50 = 500 msgs
+    - slurm will distribute all array-jobs ("subjobs") into different nodes
+* If you set `--array=1-2` and `--nodes=2` you will get:
+    - 4 processes running
+    - 2 subjobs (e.g., `3607061_1` + `3607061_2`) but running in two different
+      node lists (e.g., `node[15-16]` + `node[18-19]`)
+* If you set `--array=1-50` and `--nodes=2` you will get:
+    - 60 processes running in parallel (n=60 in srv)
+    - First 30+30=60, and then 20+20=40 parallel processes
+    - (50 subjobs) * (2 nodes each) * (10 msgs each) = 1000 msgs
+* If you set `--array=1-50` and `--nodes=2` but **without** `srun`, you will get:
+    - First 30 then 20 parallel processes.
+    - I.e., for each subjob, one node is wasted doing nothing.
+    - (30+20 subjobs) * (10 msgs each) = 500 msgs
+* If you set `--mail-type=END` you will get only one email. E.g.,
+  `Slurm Array Summary Job_id=3607247_* (3607247) Name=botbatch Ended, COMPLETED`
+
+In summary:
+  - Always use `srun`
+  - For each array-job/sub-job * for each node: run the command of `srun`
+  - `srun` will distribute one instance of the cmd for each node assigned to the
+    (sub)job.
+
+Example:
+
+```bash
+#SBATCH --nodes=2
+#SBATCH --array=1-50
+```
+
+vs taks + **srun**
 
 ```bash
 #SBATCH --ntasks=50
 #SBATCH --nodes=5
+srun CMD
 ```
+
+## array
+
+in my cluster, for anything bigger than 50 in `#SBATCH --array=1-50` it will
+return `sbatch: error: QOSMaxSubmitJobPerUserLimit`
 
 ### array vs ntasks
 
