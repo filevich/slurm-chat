@@ -228,7 +228,7 @@ done Sun May 26 02:04:06 -03 2024
 On its website, cluster.uy shows this info:
 
 ```
-node            CPU_type        cores ‡ mem_node gpu_node        disk
+node            CPU_type        cores ‡ mem_node gpu_node        disk `/scratch`
 node[01-14][17] Xeon Gold 6138  40      128 GB   NVIDIA P100     300 GB SSD
 node[15][16]    Xeon Gold 6138  40      128 GB   NVIDIA A100     300 GB SSD
 node[26-28]     Xeon Gold 6138  40      128 GB   -               300 GB SSD
@@ -237,6 +237,9 @@ node23          Xeon Gold 6138  40      128 GB   NVIDIA P100 x 3 300 GB SSD
 node[24-25]     Xeon Gold 6138  40      512 GB   -               300 GB SSD
 node31          AMD EPYC  7642  96      256 GB   -               150 GB SSD
 ```
+
+Notice: Max possible memory requested for a single job is 125 GiB, 503 GiB or 
+251 GiB.
 
 ‡ That information is kind of misleading. E.g., Xeon Gold 6138 has 20 physical
 cores, and 40 (physical) threads, but only if Hyper-Threading is enabled.
