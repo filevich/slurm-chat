@@ -243,9 +243,9 @@ Notice: Max possible memory requested for a single job is 125 GiB, 503 GiB or
 
 ‡ That information is kind of misleading. E.g., Xeon Gold 6138 has 20 physical
 cores, and 40 (physical) threads, but only if Hyper-Threading is enabled.
-To the date, cluster.uy DOES NOT has HT enabled, so the actual number of cores
-per cpu should be half for each of them. Same for AMD Epyc 7642 which in reality
-only has 48 physical cores.
+In theory, cluster.uy DOES NOT has HT enabled (to the date), so the actual 
+number of cores per cpu should be half for each of them. Same for AMD Epyc 7642 
+which in reality it only has 48 physical cores.
 
 And thus,
 
