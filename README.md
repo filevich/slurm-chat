@@ -255,17 +255,41 @@ number_nodes * cpus_per_node = total_cpus
 (1)          *      (20)     = 20
 (25-24+1)    *      (20)     = 40
 (1)          *      (96)     = 48
-                              -------
-                               608 = (1.216 / 2)
+-------------                  -------
+29 nodes                       608 = (1.216 / 2) cpus
 ```
+
+
+### Usage
+
+On cluster.uy's official Telegram channel it shows this info:
+
+```
+alloc       6 nodes (240 CPUs)
+drain       1 nodes (40 CPUs)
+idle        6 nodes (296 CPUs)
+mix        16 nodes (728 CPUs)
+Total      29 nodes (1304 CPUs) 👈 which is bigger than 1.216 🤷‍♂️
+```
+
+- As of today, (Mat 26th, 2024) the cluster usage is at 80% for cpus, and 79% 
+  for gpus.
+
+- These are the today's top 10 single user cpu-hours consumption in the last 24h:
+  `34944, 11237, 10680, 10248, 9780, 9542, 7368, 5400, 5040, 2433`
+
+- I.e., `1456, 468, 445, 427, 407, 397, 307, 225, 210, 101` cores used per hour.
+
 
 ### Comparison
 
 - Noam Brown used 600 nodes, each equipped with 28 cores, over a period of 40 
-  days to train Libratus. That is, `600 nodes * 28 cores * 40 days * 24 hours = 16M core-hours`
+  days to train Libratus. That is, `600 nodes * 28 cores * 40 days * 24 hours = 16M core-hours`.
+  I.e., `16800` cores per hour.
 
-- The system where Pluribus was trained used `(n nodes * c cores) * d days * 24 hours = 12.4k core-hours` 
+- The system where Pluribus was trained used `(n nodes * c cores) * d days * 24 hours = 12.4k core-hours`.
   where `n*c = 64`, so we can derive that it was trained for about 8 days.
+  I.e., `64` cores per hour.
 
 - ReBeL used 7.5k core-hours, only one single machine for training and up to 
   128 machines with 8 GPUs each for data generation (i.e., self-play).
