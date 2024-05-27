@@ -2,6 +2,7 @@ import socket
 import threading
 import argparse
 import datetime
+import json
 
 parser = argparse.ArgumentParser(description='TCP Chat Server')
 parser.add_argument('--host', default='0.0.0.0', help='Host IP address (default: 0.0.0.0)')
@@ -16,9 +17,20 @@ clients = []
 total_msgs = 0
 we_re_open = None
 
+def stringify_addr(addr:tuple[str,int]) -> str:
+    return ":".join(map(str, addr))
+
+def log(data:object) -> None:
+    data = json.dumps(data)
+    print(data)
+
 def we_re_close():
     delta = datetime.datetime.now() - we_re_open
-    print(f"We are officially CLOSE after {delta} with {total_msgs} msgs!")
+    log({
+        "type": "CLOSED",
+        "total": total_msgs,
+        "delta": delta.total_seconds(),
+    })
 
 def broadcast(message, sender_socket):
     with lock:
@@ -38,7 +50,10 @@ def handle(client):
         try:
             message = client.recv(1024)
             if message.decode() == "exit":
-                print(f"Client {client.getpeername()} disconnected")
+                log({
+                    "type": "CONN_CLOSED",
+                    "addr": stringify_addr(client.getpeername())
+                })
                 with lock:
                     clients.remove(client)
                     if not clients:
@@ -52,7 +67,13 @@ def handle(client):
                     total_msgs += 1
                     delta = datetime.datetime.now() - we_re_open
                     delta = delta.total_seconds()
-                    print(f"[IN][n={n}][t={total_msgs}][{delta}] {message.decode()}")
+                    log({
+                        "type": "IN",
+                        "n":     n,
+                        "total": total_msgs,
+                        "delta": delta,
+                        "msg":   message.decode()
+                    })
         except:
             with lock:
                 clients.remove(client)
@@ -66,7 +87,10 @@ def receive():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()
-    print(f"Server is listening on {HOST}:{PORT}")
+    log({
+        "type": "START",
+        "addr": f"{HOST}:{PORT}"
+    })
 
     while True:
         client, addr = server_socket.accept()
@@ -75,11 +99,19 @@ def receive():
             if len(clients) == 1:
                 total_msgs = 0
                 we_re_open = datetime.datetime.now()
-                print(f"[t={total_msgs}] We are officially open at {we_re_open} with {total_msgs} msgs! :) ")
-        print(f"Connected with {str(addr)}")
-        client.send('Connected to the server!'.encode())
+                log({
+                    "type":  "OPENED",
+                    "total": total_msgs,
+                    "time":  str(we_re_open),
+                })
+        
+        log({
+            "type": "NEW_CONN",
+            "addr": stringify_addr(addr)
+        })
+        
+        client.send("Connected to the server!".encode())
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
 
-print("Server is running...")
 receive()
