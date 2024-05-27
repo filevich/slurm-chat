@@ -26,11 +26,11 @@ def log(data:object) -> None:
 
 def we_re_close():
     delta = datetime.datetime.now() - we_re_open
-    # log({
-    #     "type": "CLOSED",
-    #     "total": total_msgs,
-    #     "delta": delta.total_seconds(),
-    # })
+    log({
+        "type": "CLOSED",
+        "total": total_msgs,
+        "delta": delta.total_seconds(),
+    })
 
 def broadcast(message, sender_socket):
     with lock:
@@ -50,10 +50,10 @@ def handle(client):
         try:
             message = client.recv(1024)
             if message.decode() == "exit":
-                log({
-                    "type": "CONN_CLOSED",
-                    "addr": stringify_addr(client.getpeername())
-                })
+                # log({
+                #     "type": "CONN_CLOSED",
+                #     "addr": stringify_addr(client.getpeername())
+                # })
                 with lock:
                     clients.remove(client)
                     if not clients:
