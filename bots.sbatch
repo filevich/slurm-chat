@@ -15,8 +15,8 @@
 #SBATCH --mail-type=NONE # options: NONE, BEGIN, END, FAIL, REQUEUE, ALL
 #SBATCH --mail-user=juan.filevich@fing.edu.uy 
 
-# every job/array-job will execute this from here
-# all job/array-job will share the same args ${@}
+# every (sub)job will execute this from here
+# all (sub)job will share the same args ${@}
 
 hr (){
 printf '%*s\n' 80 | tr ' ' '-'
@@ -29,12 +29,25 @@ hr
 
 bot_name="bot_${SLURM_ARRAY_JOB_ID}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
 
-# run
-N=node03.datos.cluster.uy
-P=56163
-random_string=$(openssl rand -base64 12)
+# get master ip:port from the "job" which:
+#   1. is run by me
+#   2. its name is srvchat
+#   3. the master-job stored in the `Comment` field, the port it will be using...
+output=$(squeue -u $(whoami) --name=srvchat --states=R -h -o "%k:%N")
+P=$(echo $output | awk -F: '{print $1}')
+N=$(echo $output | awk -F: '{print $2}')
+
+# alternatively, you could just do something like:
+# N=${1:-"node03.datos.cluster.uy"}
+# P=${2:-"52850"}
+
 # srun will run this cmd `nodes` times in parallel
-srun $HOME/miniconda3/envs/testing/bin/python $HOME/Workspace/_tmp/chat/bot.py --host ${N} --port ${P} -n ${1} ${bot_name}
+srun $HOME/miniconda3/envs/testing/bin/python \
+  $HOME/Workspace/_tmp/chat/bot.py \
+  --host ${N} \
+  --port ${P} \
+  -n ${1} \
+  ${bot_name}
 
 hr
 printf "done: $(date)\n"
