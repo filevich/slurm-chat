@@ -26,11 +26,11 @@ def log(data:object) -> None:
 
 def we_re_close():
     delta = datetime.datetime.now() - we_re_open
-    log({
-        "type": "CLOSED",
-        "total": total_msgs,
-        "delta": delta.total_seconds(),
-    })
+    # log({
+    #     "type": "CLOSED",
+    #     "total": total_msgs,
+    #     "delta": delta.total_seconds(),
+    # })
 
 def broadcast(message, sender_socket):
     with lock:
@@ -105,10 +105,10 @@ def receive():
                     "time":  str(we_re_open),
                 })
         
-        log({
-            "type": "NEW_CONN",
-            "addr": stringify_addr(addr)
-        })
+        # log({
+        #     "type": "NEW_CONN",
+        #     "addr": stringify_addr(addr)
+        # })
         
         client.send("Connected to the server!".encode())
         thread = threading.Thread(target=handle, args=(client,))
