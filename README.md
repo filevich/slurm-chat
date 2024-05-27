@@ -4,6 +4,9 @@
 - start alice `python3 ~/Workspace/py/chat/cli.py --port 8989 alice`
 - start bob `python3 ~/Workspace/py/chat/cli.py --port 8989 bob`
 
+
+
+
 ## How to run in SLURM cluster
 
 Reserve a node to host the srv
@@ -219,6 +222,31 @@ Disconnected from the server
 --------------------------------------------------------------------------------
 done Sun May 26 02:04:06 -03 2024
 ```
+
+
+
+## About SLURM info variables
+
+### When running with `--array=1-n` and `--nodes=m`
+
+1. ${SLURM_ARRAY_JOB_ID} it's the same for all `array-jobs`.
+   It's the "base id".
+   E.g., let's say `SLURM_ARRAY_JOB_ID` is `1000`
+
+2. Then, if we executed `--array=1-n` we'll get all these (sub)jobs
+   `1000, 1001, 1002, 1003, ..., 100(n-1)`
+   ${SLURM_JOB_ID} will be one of these.
+
+3. Finally, ${SLURM_ARRAY_TASK_ID} is the (sub)job ix.
+   So SLURM_ARRAY_TASK_ID is in [1,n]
+   I.e., `SLURM_ARRAY_JOB_ID` + `SLURM_ARRAY_TASK_ID` = `SLURM_JOB_ID`
+   E.g., `1000`               + `5`                   = `1005`
+
+in summary, (and counterintuitively):
+  when using `--array=1-n`
+  - ${SLURM_ARRAY_JOB_ID} is the base/father ID 1000 ("shared" in all (sub)jobs)
+  - ${SLURM_ARRAY_TASK_ID} is the (sub)job index
+  - ${SLURM_JOB_ID} = SLURM_ARRAY_JOB_ID + SLURM_ARRAY_TASK_ID
 
 
 
