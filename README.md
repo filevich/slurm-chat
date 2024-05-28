@@ -31,6 +31,8 @@ Now, run the parallel bots with
 
 ## Two paradigms: `Array job` vs `ntasks`
 
+![asd](logs/plot.png)
+
 - If you use array: the (sub)jobs may start at different times
 - If you use tasks: they're gonna start all at the same time
 
