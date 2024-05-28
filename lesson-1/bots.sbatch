@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# run as `sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/bots.sbatch NUM_MSGS`
+# when using standard args launch it as:
+# `sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/lesson-1/bots.sbatch <NUM_MSGS>`
+
+# when using standard env vars launch it as:
+# `NUM_MSGS=100 sbatch -J botbatch --export=ALL ~/Workspace/_tmp/slurm-chat/lesson-1/bots.sbatch`
 
 # if you want to use an array-job instead remove the `--ntasks` param and add 
 # something like
@@ -33,27 +37,30 @@ printf "starts: $(date)\n"
 echo "args: ${@}"
 hr
 
-bot_name="bot_${SLURM_ARRAY_JOB_ID}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+echo $FOO
+
+NUM_MSGS=${1}
+BOT_NAME="bot_${SLURM_ARRAY_JOB_ID}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
 
 # get master ip:port from the "job" which:
 #   1. is run by me
 #   2. its name is srvchat
 #   3. the master-job stored in the `Comment` field, the port it will be using...
 output=$(squeue -u $(whoami) --name=srvchat --states=R -h -o "%k:%N")
-P=$(echo $output | awk -F: '{print $1}')
-N=$(echo $output | awk -F: '{print $2}')
+PORT=$(echo $output | awk -F: '{print $1}')
+HOST=$(echo $output | awk -F: '{print $2}')
 
-# alternatively, you could just do something like:
-# N=${1:-"node03.datos.cluster.uy"}
-# P=${2:-"52850"}
+# alternatively, you could just env vars or standard args, like this:
+# HOST=${1:-"node03.datos.cluster.uy"}
+# PORT=${2:-"52850"}
 
 # srun will run this cmd `nodes` times in parallel
 srun $HOME/miniconda3/envs/testing/bin/python \
-  $HOME/Workspace/_tmp/chat/bot.py \
-  --host ${N} \
-  --port ${P} \
-  -n ${1} \
-  ${bot_name}
+  $HOME/Workspace/_tmp/slurm-chat/lesson-1/bot.py \
+  --host ${HOST} \
+  --port ${PORT} \
+  -n ${NUM_MSGS} \
+  ${BOT_NAME}
 
 hr
 printf "done: $(date)\n"

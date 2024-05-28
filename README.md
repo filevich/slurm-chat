@@ -1,8 +1,8 @@
 ## How to run locally
 
-- start server `python3 ~/Workspace/py/chat/srv.py --port 8989`
-- start alice `python3 ~/Workspace/py/chat/cli.py --port 8989 alice`
-- start bob `python3 ~/Workspace/py/chat/cli.py --port 8989 bob`
+- start server `python3 lesson-1/srv.py --port 8989`
+- start alice `python3 lesson-1/cli.py --port 8989 alice`
+- start bob `python3 lesson-1/cli.py --port 8989 bob`
 
 
 
@@ -19,12 +19,12 @@ Then, once inside of it run
 PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
 echo "Starting srv on port $PORT"
 scontrol update JobId="$SLURM_JOB_ID" Comment="$PORT"
-$HOME/miniconda3/envs/testing/bin/python3 $HOME/Workspace/_tmp/slurm-chat/srv.py --port $PORT
+$HOME/miniconda3/envs/testing/bin/python3 $HOME/Workspace/_tmp/slurm-chat/lesson-1/srv.py --port $PORT
 ```
 
 Now, run the parallel bots with
 
-`sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/bots.sbatch 10`
+`sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/lesson-1/bots.sbatch 10`
 
 
 
