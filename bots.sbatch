@@ -2,12 +2,18 @@
 
 # run as `sbatch -J botbatch ~/Workspace/_tmp/slurm-chat/bots.sbatch NUM_MSGS`
 
+# if you want to use an array-job instead remove the `--ntasks` param and add 
+# something like
+# --array=1-20 # array sub jobs
+# --nodes=3
+# instead
+
 #SBATCH --job-name=defaultname
-#SBATCH --array=1-20
-#SBATCH --nodes=3
+#SBATCH --nodes=5 # nodes to use in total, per job or subjob
+#SBATCH --ntasks=50 # when doing `srun` launch `ntaks` parallel jobs across `nodes`
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=128M
-#SBATCH --time=0-00:4:00
+#SBATCH --time=0-00:25:00
 #SBATCH --partition=normal 
 #SBATCH --qos=normal
 #SBATCH --output=/clusteruy/home/juan.filevich/batches/out/chat/%x.%j.out
