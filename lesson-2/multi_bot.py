@@ -38,6 +38,14 @@ def write(client, nickname, n:int=10, base:int=5):
     client.send("exit".encode())
     client.close()
 
+import atexit
+import resource
+
+def print_max_memory_usage():
+    max_mem_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    max_mem_mib = max_mem_kb / 1024  # Convert KiB to MiB
+    print(f"Maximum memory usage: {max_mem_mib:.2f} MiB")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TCP Chat Client')
     parser.add_argument('client', help='Client name')
@@ -51,6 +59,7 @@ if __name__ == "__main__":
     PORT     = args.port
     N        = args.n
 
+    atexit.register(print_max_memory_usage)
     signal.signal(signal.SIGINT, lambda: signal_handler(client))
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,5 +68,7 @@ if __name__ == "__main__":
     receive_thread = threading.Thread(target=receive, args=(client,))
     receive_thread.start()
 
-    write_thread = threading.Thread(target=write, args=(client, nickname, N,))
+    write_thread = threading.Thread(target=write, args=(client, nickname, N, 0))
     write_thread.start()
+
+    # will execute this
