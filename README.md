@@ -1,14 +1,30 @@
-# Lesson 1
+# An practical into to SLURM
+
+I made this guide to understand how SLURM works. 
+
+In lesson 0, we'll start by building and run (locally) a very simple "chat" 
+system where clients can send messages to a central server which will then 
+broadcast to the rest of the clients.
+
+In lesson 1, we'll learn how SLURM's `.sbatch` files work, and how we can launch 
+multiple clients at once and communicate with each other but this time in the 
+cluster. (Not locally). We'll also learn the difference between array-job and 
+taks. (I.e., a 1xM system with a single server and multiple clients).
+
+In lesson 2, we'll extend our definition of client, so that a single client can
+connect and send messages to multiple servers and not just one. I.e., an NxM 
+system.
 
 
-## How to run locally
+# Lesson 0
+
+## To run locally
 
 - start server `python3 lesson-1/srv.py --port 8989`
 - start alice `python3 lesson-1/cli.py --port 8989 alice`
 - start bob `python3 lesson-1/cli.py --port 8989 bob`
 
-
-
+# Lesson 1
 
 ## How to run in SLURM cluster
 
@@ -16,7 +32,7 @@ Reserve a node to host the srv
 
 `srun --job-name=srvchat --time=05:00:00 --partition=besteffort --qos=besteffort --ntasks=1 --cpus-per-task=1 --mem=512M --pty bash -l`
 
-Then, once inside of it run
+Then, once inside it, run
 
 ```bash
 PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
@@ -53,9 +69,9 @@ Example:
 ```
 
 * You cannot set `--array` greater than 50 (otherwise it'll return 
-  `sbatch: error: QOSMaxSubmitJobPerUserLimit`)
+  `sbatch: error: QOSMaxSubmitJobPerUserLimit`, at least in my uni's cluster)
 * In `normal` QoS only 30 (sub)jobs will run in parallel. If you set `--array` 
-  to 50, then it will run 30 processes, and then 20.
+  to 50, then it will first run 30 processes, and then 20.
 * If you run with `--array=1-50` and set sbatch bots to produce 10 msgs you will get:
     - First 30 parallel processes, and then 20 parallel procesess
     - 50 log files in total (one for each bot)
@@ -216,7 +232,5 @@ If we use:
 ```
 
 We'll get "can't run 1 processes on 2 nodes, setting nnodes to 1"
-
-You need to remove `--ntasks=1`
 
 
