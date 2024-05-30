@@ -14,12 +14,12 @@
 
 #SBATCH --job-name=defaultname
 #SBATCH --nodes=5 # nodes to use in total, per job or subjob
-#SBATCH --ntasks=50 # when doing `srun` launch `ntaks` parallel jobs across `nodes`
+#SBATCH --ntasks=10 # when doing `srun` launch `ntaks` parallel jobs across `nodes`
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=128M
-#SBATCH --time=0-00:25:00
-#SBATCH --partition=normal 
-#SBATCH --qos=normal
+#SBATCH --time=0-00:10:00
+#SBATCH --partition=besteffort 
+#SBATCH --qos=besteffort
 #SBATCH --output=/clusteruy/home/juan.filevich/batches/out/chat/%x.%j.out
 #SBATCH --error=/clusteruy/home/juan.filevich/batches/out/chat/%x.%j.out
 #SBATCH --mail-type=NONE # options: NONE, BEGIN, END, FAIL, REQUEUE, ALL
@@ -37,29 +37,25 @@ printf "starts: $(date)\n"
 echo "args: ${@}"
 hr
 
-echo $FOO
-
+# get master ip:port from the "job" which:
+#   1. is run by me
+#   2. its name is srvs
+#   3. the master-job stored in the `Comment` field, the port it will be using...
+srvs=$(squeue -u $(whoami) --name=srvs --states=R -h -o "%N:%k" | paste -sd ",")
 NUM_MSGS=${1}
 BOT_NAME="bot_${SLURM_ARRAY_JOB_ID}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
 
-# get master ip:port from the "job" which:
-#   1. is run by me
-#   2. its name is srvchat
-#   3. the master-job stored in the `Comment` field, the port it will be using...
-output=$(squeue -u $(whoami) --name=srvchat --states=R -h -o "%k:%N")
-PORT=$(echo $output | awk -F: '{print $1}')
-HOST=$(echo $output | awk -F: '{print $2}')
+echo "using: srv:${srvs} nummsgs:${NUM_MSGS} botname:${BOT_NAME}"
 
 # alternatively, you could just env vars or standard args, like this:
 # HOST=${1:-"node03.datos.cluster.uy"}
 # PORT=${2:-"52850"}
 
 # srun will run this cmd `nodes` times in parallel
-srun $HOME/miniconda3/envs/testing/bin/python \
+srun $HOME/miniconda3/envs/testing/bin/python -u \
   $HOME/Workspace/_tmp/slurm-chat/lesson-2/multi_bot.py \
-  --host ${HOST} \
-  --port ${PORT} \
-  -n ${NUM_MSGS} \
+  --servers ${srvs} \
+  --num_msgs ${NUM_MSGS} \
   ${BOT_NAME}
 
 hr

@@ -13,10 +13,10 @@ def parse_log(logfile:str) -> list[object]:
     return res
 
 
-array50nodes1 = parse_log("logs/array50-nodes1-100m.log")
-array25nodes2 = parse_log("logs/array25-nodes2-100m.log")
-nodes5tasks50 = parse_log("logs/nodes5-tasks50-100m.log")
-array0nodes5tasks50 = parse_log("logs/array0-nodes5-tasks50-100m.log")
+array50nodes1 = parse_log("lesson-1/logs/array50-nodes1-100m.log")
+array25nodes2 = parse_log("lesson-1/logs/array25-nodes2-100m.log")
+nodes5tasks50 = parse_log("lesson-1/logs/nodes5-tasks50-100m.log")
+array0nodes5tasks50 = parse_log("lesson-1/logs/array0-nodes5-tasks50-100m.log")
 
 import matplotlib.pyplot as plt
 
