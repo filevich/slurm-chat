@@ -194,7 +194,7 @@ Start the bots with
 sbatch -J bots ~/Workspace/_tmp/slurm-chat/lesson-2/bots.sbatch 300
 ```
 
-or a single "live" bot with:
+alternatively, you could launch a single "live" bot with:
 
 ```bash
 srun --job-name=pepe-the-bot --time=00:01:00 --partition=besteffort --qos=besteffort --ntasks=1 --cpus-per-task=1 --mem=128M $HOME/miniconda3/envs/testing/bin/python -u $HOME/Workspace/_tmp/slurm-chat/lesson-2/multi_bot.py --servers $(squeue -u $(whoami) --name=srvs --states=R -h -o "%N:%k" | paste -sd ",") --num_msgs 15 pepe
